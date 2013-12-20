@@ -67,7 +67,12 @@ _.extend(FormSubmitter, {
 
 _.extend(FormSubmitter.prototype, {
   updateOptions: function (options) {
+    this.options = _.extend({}, this.options, options);
     return this;
+  },
+
+  submitForm: function (formValues) {
+    return FormSubmitter.submitForm(formValues, this.options.formProvider, this.options.promisifiedRequest);
   }
 })
 var C = {

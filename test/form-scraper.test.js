@@ -223,10 +223,40 @@ describe("Form Scraper", function () {
       })
     })
     describe("new instance", function () {
+      var submitter;
+      var options;
+      beforeEach( function () {
+        submitter = new form.FormSubmitter();
+        options = {
+          formProvider: {provideForm: function () {return when.resolve( {action: "", data: {}})} },
+          promisifiedRequest: {post: when.resolve }
+        };
+      })
       describe("#.updateOptions()", function () {
         it("returns itself", function () {
-          var submitter = new form.FormSubmitter();
           submitter.updateOptions().should.be.equal(submitter);
+        })
+      })
+      describe("#.submitForm()", function () {
+        beforeEach( function () {
+          submitter.updateOptions(options);
+        })
+        it("should return a Promise", function () {
+          submitter.submitForm().should.have.property("then");
+        })
+        describe("Given a FormProvider and a PromisedRequest", function () {
+          it("a form should be requested", function (done) {
+            sinon.spy(options.formProvider, "provideForm");
+            submitter.submitForm().then( function () {
+              options.formProvider.provideForm.should.be.called;
+            }).should.notify(done);
+          })
+          it("and posted", function (done) {
+            sinon.spy(options.promisifiedRequest, "post");
+            submitter.submitForm().then( function () {
+              options.promisifiedRequest.post.should.be.called;
+            }).should.notify(done);
+          })
         })
       })
     })
