@@ -171,10 +171,62 @@ describe("Form Scraper", function () {
     })
   })
   describe("FormSubmitter", function () {
+    var submitter = form.FormSubmitter;
+    var options = {};
+
+    beforeEach( function () {
+      options.formProvider = { provideForm: when.resolve };
+      options.promisifiedRequest = { post: when.resolve };
+      options.formValues = {name: "val"};
+    })
+
     describe("functional", function () {
       describe("#.submitForm()", function () {
+        var submitForm = submitter.submitForm;
         it("returns a promise", function () {
-          
+          submitForm(options.formValues, options.formProvider, options.promisifiedRequest).should.have.property("then");
+        })
+        describe("Given FormProvider And Promisified Request", function () {
+          var postResponse;
+          beforeEach( function () {
+            options.formProvider.provideForm = function() {return when.resolve({action: "url", data: {name:""}})};
+            sinon.spy(options.formProvider, "provideForm");
+            sinon.spy(options.promisifiedRequest, "post");
+            postResponse = submitForm(options.formValues, options.formProvider, options.promisifiedRequest);
+          })
+          it("should call it's .provideForm()", function () {
+            options.formProvider.provideForm.should.be.called;
+          })
+          it("and then it should post the form", function (done) {
+            postResponse.then( function () {
+              options.promisifiedRequest.post.should.be.called;
+            }).should.notify(done);
+          })
+          it("to the url that is returned from FormProvider", function (done) {
+            postResponse.then( function () {
+              options.promisifiedRequest.post.should.be.calledWith("url");
+            }).should.notify(done);
+          })
+          it("with the form data from FormProvider", function (done) {
+            postResponse.then( function () {
+              options.promisifiedRequest.post.getCall(0).args[1].form.should.have.property("name");
+            }).should.notify(done);
+          })
+          describe("Given formValues", function () {
+            it("Then it should combine it with `data` from FormProvider", function (done) {
+              postResponse.then( function () {
+                options.promisifiedRequest.post.getCall(0).args[1].form.should.have.property("name", "val");
+              }).should.notify(done);
+            })
+          })
+        })
+      })
+    })
+    describe("new instance", function () {
+      describe("#.updateOptions()", function () {
+        it("returns itself", function () {
+          var submitter = new form.FormSubmitter();
+          submitter.updateOptions().should.be.equal(submitter);
         })
       })
     })

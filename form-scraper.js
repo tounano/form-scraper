@@ -56,14 +56,23 @@ _.extend(ScrapingFormProvider.prototype, {
   }
 });
 
-var testOptions = {
-  promisifiedRequest: "",
-  formUrl: "",
-  formId: ""
-}
+var FormSubmitter = function () {};
+_.extend(FormSubmitter, {
+  submitForm: function (formValues, formProvider, promisifiedRequest) {
+    return formProvider.provideForm().then( function (formData) {
+      return promisifiedRequest.post(formData.action, {form: _.extend(formData.data, formValues) });
+    });
+  }
+});
 
+_.extend(FormSubmitter.prototype, {
+  updateOptions: function (options) {
+    return this;
+  }
+})
 var C = {
   ERROR_FORM_IS_ABSENT: "ERROR_FORM_IS_ABSENT"
 }
 
 exports.ScrapingFormProvider = ScrapingFormProvider;
+exports.FormSubmitter = FormSubmitter;
