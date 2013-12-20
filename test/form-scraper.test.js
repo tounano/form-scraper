@@ -33,7 +33,7 @@ describe("Form Scraper", function () {
       var spyRequestGet;
 
       beforeEach( function () {
-        dummyPromisifiedRequest = {get: sinon.spy().returns(when.resolve) };
+        dummyPromisifiedRequest = {get: sinon.spy(when.resolve) };
       })
 
       it("gets the `url`", function () {
