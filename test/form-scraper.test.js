@@ -1,8 +1,7 @@
 var moduleToTest  = "../form-scraper";
-var proxyquire  = require("proxyquire")
-var chai        = require("chai")
-var sinon       = require("sinon")
-var sinonChai   = require("sinon-chai")
+var chai        = require("chai");
+var sinon       = require("sinon");
+var sinonChai   = require("sinon-chai");
 
 chai.use(sinonChai)
 var should = chai.should()

@@ -81,3 +81,11 @@ var C = {
 
 exports.ScrapingFormProvider = ScrapingFormProvider;
 exports.FormSubmitter = FormSubmitter;
+exports.fetchForm = ScrapingFormProvider.provideForm;
+exports.submitForm = FormSubmitter.submitForm;
+
+exports.provideForm = function (promiseForForm) {
+  return {
+    provideForm: function () { return promiseForForm }
+  }
+}
