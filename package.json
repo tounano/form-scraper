@@ -1,7 +1,7 @@
 {
   "name": "form-scraper",
   "description": "Scrape and Submit forms easily...",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "ClickHere <js@clickhere.co.il>",
   "dependencies": {
     "when": "2.7.x",
@@ -22,7 +22,7 @@
     "scraper",
     "scraping"
   ],
-  "repository": "",
+  "repository": "https://github.com/tounano/form-scraper.git",
   "main": "form-scraper",
   "engines": {
     "node": ">= 0.8.0"
