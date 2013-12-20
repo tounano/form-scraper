@@ -42,12 +42,12 @@ describe("Form Scraper", function () {
         dummyPromisifiedRequest.get.should.have.been.calledWith(dummyUrl);
       })
       it("and returns a promise", function () {
-        ScrapingFormProvider.provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest).should.have.property("then");
+        provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest).should.have.property("then");
       })
       describe("Given an error happened during the request", function () {
         it("then it returns a rejected promise with the `error` as reason", function (done) {
           dummyPromisifiedRequest.get = sinon.stub().returns(when.reject("ERROR"));
-          ScrapingFormProvider.provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest)
+          provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest)
             .should.be.rejectedWith("ERROR").and.notify(done);
         })
       })
@@ -56,91 +56,83 @@ describe("Form Scraper", function () {
           var formIsNotPresent = "<html></html>";
           it("Then reject the promise with ERROR_FORM_IS_ABSENT", function (done) {
             dummyPromisifiedRequest.get = sinon.stub().returns(when.resolve({body: formIsNotPresent}));
-            ScrapingFormProvider.provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest).
+            provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest).
               should.be.rejectedWith("ERROR_FORM_IS_ABSENT").and.notify(done);
           })
         })
         describe("And the requested form is present", function () {
           var formIsPresent = "<html><form action=\"url\" id=\"test\">bla bla</form></html>";
-
+          var promisedForm;
           beforeEach( function () {
             dummyPromisifiedRequest.get = sinon.stub().returns(when.resolve({ body: formIsPresent }));
+            promisedForm = provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest);
           })
           it("Then resolve the promise with object", function (done) {
-            ScrapingFormProvider.provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest)
-              .should.eventually.be.instanceOf(Object).and.notify(done);
+            promisedForm.should.eventually.be.instanceOf(Object).and.notify(done);
           })
           it("that has `action`, `data`", function (done) {
-            ScrapingFormProvider.provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest)
-              .should.eventually.have.property("action").and.notify(done);
+            promisedForm.should.eventually.have.property("action").and.notify(done);
           })
           it("and `action` should be the action url", function (done) {
-            ScrapingFormProvider.provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest)
-              .should.eventually.have.property("action", dummyUrl).and.notify(done);
+            promisedForm.should.eventually.have.property("action", dummyUrl).and.notify(done);
           })
           describe("Given the form have no inputs", function () {
+            var promisedForm;
+            beforeEach( function () {
+              promisedForm = provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest);
+            })
             it("`data` should be empty object", function (done) {
-              ScrapingFormProvider.provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest)
-                .then( function (form) {
+              promisedForm.then( function (form) {
                   form.data.should.be.instanceOf(Object);
-                })
-                .should.notify(done);
+              }).should.notify(done);
             })
           })
           describe("Given the form has one input", function () {
             var formWithInputs = "<html><form action=\"url\" id=\"test\"><input name=\"input1\" value=\"val\" /></form></html>";
+            var promisedForm;
             beforeEach( function () {
               dummyPromisifiedRequest.get = sinon.stub().returns(when.resolve({ body: formWithInputs }));
+              promisedForm = provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest);
             })
             it("Then `data` should have the inputs", function (done) {
-              ScrapingFormProvider.provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest)
-                .then( function (form) {
-                  Object.keys(form.data).length.should.be.greaterThan(0);
-                })
-                .should.notify(done);
+              promisedForm.then( function (form) {
+                Object.keys(form.data).length.should.be.greaterThan(0);
+              }).should.notify(done);
             })
             it("where inputs name is the key", function (done) {
-              ScrapingFormProvider.provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest)
-                .then( function (form) {
-                  form.data.should.have.property("input1");
-                })
-                .should.notify(done);
+              promisedForm.then( function (form) {
+                form.data.should.have.property("input1");
+              }).should.notify(done);
             })
             it("and the input's value is the value", function (done) {
-              ScrapingFormProvider.provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest)
-                .then( function (form) {
-                  form.data.should.have.property("input1", "val");
-                })
-                .should.notify(done);
+              promisedForm.then( function (form) {
+                form.data.should.have.property("input1", "val");
+              }).should.notify(done);
             })
           })
           describe("Given the form has several inputs", function () {
             var formWithInputs = "<html><form action=\"url\" id=\"test\"><input name=\"input1\" value=\"val\" /><input name=\"input2\" value=\"val2\" /></form></html>";
+            var promisedForm;
             beforeEach( function () {
               dummyPromisifiedRequest.get = sinon.stub().returns(when.resolve({ body: formWithInputs }));
+              promisedForm = provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest);
             })
             it("Then it should have several inputs", function (done) {
-              ScrapingFormProvider.provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest)
-                .then( function (form) {
-                  Object.keys(form.data).length.should.be.greaterThan(1);
-                })
-                .should.notify(done);
+              promisedForm.then( function (form) {
+                Object.keys(form.data).length.should.be.greaterThan(1);
+              }).should.notify(done);
             })
             it("where `keys` are the names", function (done) {
-              ScrapingFormProvider.provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest)
-                .then( function (form) {
-                  form.data.should.have.property("input1");
-                  form.data.should.have.property("input2");
-                })
-                .should.notify(done);
+              promisedForm.then( function (form) {
+                form.data.should.have.property("input1");
+                form.data.should.have.property("input2");
+              }).should.notify(done);
             })
             it("and values are the values", function (done) {
-              ScrapingFormProvider.provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest)
-                .then( function (form) {
-                  form.data.should.have.property("input1", "val");
-                  form.data.should.have.property("input2", "val2");
-                })
-                .should.notify(done);
+              promisedForm.then( function (form) {
+                form.data.should.have.property("input1", "val");
+                form.data.should.have.property("input2", "val2");
+              }).should.notify(done);
             })
           })
         })
