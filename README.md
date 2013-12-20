@@ -152,7 +152,7 @@ formProvider.updateOptions({
     promisifiedRequest: pRequest
 });
 
-formProvider
+formSubmitter
     .updateOptions({
         formProvider: formProvider,
         promisifiedRequest: pRequest
