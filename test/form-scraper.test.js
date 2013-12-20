@@ -29,14 +29,17 @@ describe("Form Scraper", function () {
       var dummyUrl = "url";
       var dummyFormId = "#test";
       var dummyPromisifiedRequest;
+      var provideForm = ScrapingFormProvider.provideForm;
+      var spyRequestGet;
+
       beforeEach( function () {
-        dummyPromisifiedRequest = {get: when.resolve };
+        dummyPromisifiedRequest = {get: sinon.spy().returns(when.resolve) };
       })
 
       it("gets the `url`", function () {
-        var spy = sinon.spy(dummyPromisifiedRequest, "get");
-        ScrapingFormProvider.provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest);
-        spy.should.have.been.calledWith(dummyUrl);
+
+        provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest);
+        dummyPromisifiedRequest.get.should.have.been.calledWith(dummyUrl);
       })
       it("and returns a promise", function () {
         ScrapingFormProvider.provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest).should.have.property("then");
