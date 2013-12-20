@@ -138,9 +138,35 @@ describe("Form Scraper", function () {
         })
       })
     })
-    describe.skip(".updateOptions()", function () {
-      it("returns itself", function () {
-        provider.updateOptions({}).should.be.equal(provider);
+    describe("Given an instance ScrapingFormProvider", function () {
+      var provider;
+      var options = { formId: "#test", url: "url", promisifiedRequest: {}}
+      beforeEach( function () {
+        provider = new ScrapingFormProvider();
+      })
+      describe("#.updateOptions()", function () {
+        it("should return itself", function () {
+          provider.updateOptions().should.be.equal(provider);
+        })
+      })
+      describe("Given promisified request", function () {
+        beforeEach( function () {
+          options.promisifiedRequest.get = when.resolve;
+          sinon.spy(options.promisifiedRequest, "get");
+          provider.updateOptions(options);
+        })
+        describe("#.provideForm()", function () {
+          var form;
+          beforeEach( function () {
+            form = provider.provideForm();
+          })
+          it("returns a promise", function () {
+            form.should.have.property("then");
+          })
+          it("and calls `get` on promisified Request", function () {
+            options.promisifiedRequest.get.should.be.called;
+          })
+        })
       })
     })
   })

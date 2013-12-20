@@ -2,7 +2,7 @@ var _ = require("underscore");
 var when = require("when");
 var cheerio = require("cheerio");
 
-var ScrapingFormProvider = function() {};
+var ScrapingFormProvider = function(options) {};
 
 _.extend(ScrapingFormProvider, {
   provideForm: function (formId, url, promisifiedRequest) {
@@ -49,6 +49,10 @@ _.extend(ScrapingFormProvider.prototype, {
   updateOptions: function (options) {
     this.options = _.extend({}, this.options, options);
     return this;
+  },
+
+  provideForm: function () {
+    return ScrapingFormProvider.provideForm(this.options.formId, this.options.url, this.options.promisifiedRequest);
   }
 });
 
