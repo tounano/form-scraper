@@ -170,4 +170,13 @@ describe("Form Scraper", function () {
       })
     })
   })
+  describe("FormSubmitter", function () {
+    describe("functional", function () {
+      describe("#.submitForm()", function () {
+        it("returns a promise", function () {
+          
+        })
+      })
+    })
+  })
 })
