@@ -27,26 +27,26 @@ describe("Form Scraper", function () {
     describe("#.provideForm()", function () {
       var dummyUrl = "url";
       var dummyFormId = "#test";
-      var dummyPromisifiedRequest;
+      var dummypRequest;
       var provideForm = ScrapingFormProvider.provideForm;
       var spyRequestGet;
 
       beforeEach( function () {
-        dummyPromisifiedRequest = {get: sinon.spy(when.resolve) };
+        dummypRequest = {get: sinon.spy(when.resolve) };
       })
 
       it("gets the `url`", function () {
 
-        provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest);
-        dummyPromisifiedRequest.get.should.have.been.calledWith(dummyUrl);
+        provideForm(dummyFormId, dummyUrl, dummypRequest);
+        dummypRequest.get.should.have.been.calledWith(dummyUrl);
       })
       it("and returns a promise", function () {
-        provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest).should.have.property("then");
+        provideForm(dummyFormId, dummyUrl, dummypRequest).should.have.property("then");
       })
       describe("Given an error happened during the request", function () {
         it("then it returns a rejected promise with the `error` as reason", function (done) {
-          dummyPromisifiedRequest.get = sinon.stub().returns(when.reject("ERROR"));
-          provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest)
+          dummypRequest.get = sinon.stub().returns(when.reject("ERROR"));
+          provideForm(dummyFormId, dummyUrl, dummypRequest)
             .should.be.rejectedWith("ERROR").and.notify(done);
         })
       })
@@ -54,8 +54,8 @@ describe("Form Scraper", function () {
         describe("And the requested form is not present", function () {
           var formIsNotPresent = "<html></html>";
           it("Then reject the promise with ERROR_FORM_IS_ABSENT", function (done) {
-            dummyPromisifiedRequest.get = sinon.stub().returns(when.resolve({body: formIsNotPresent}));
-            provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest).
+            dummypRequest.get = sinon.stub().returns(when.resolve({body: formIsNotPresent}));
+            provideForm(dummyFormId, dummyUrl, dummypRequest).
               should.be.rejectedWith("ERROR_FORM_IS_ABSENT").and.notify(done);
           })
         })
@@ -63,8 +63,8 @@ describe("Form Scraper", function () {
           var formIsPresent = "<html><form action=\"url\" id=\"test\">bla bla</form></html>";
           var promisedForm;
           beforeEach( function () {
-            dummyPromisifiedRequest.get = sinon.stub().returns(when.resolve({ body: formIsPresent }));
-            promisedForm = provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest);
+            dummypRequest.get = sinon.stub().returns(when.resolve({ body: formIsPresent }));
+            promisedForm = provideForm(dummyFormId, dummyUrl, dummypRequest);
           })
           it("Then resolve the promise with object", function (done) {
             promisedForm.should.eventually.be.instanceOf(Object).and.notify(done);
@@ -78,7 +78,7 @@ describe("Form Scraper", function () {
           describe("Given the form have no inputs", function () {
             var promisedForm;
             beforeEach( function () {
-              promisedForm = provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest);
+              promisedForm = provideForm(dummyFormId, dummyUrl, dummypRequest);
             })
             it("`data` should be empty object", function (done) {
               promisedForm.then( function (form) {
@@ -90,8 +90,8 @@ describe("Form Scraper", function () {
             var formWithInputs = "<html><form action=\"url\" id=\"test\"><input name=\"input1\" value=\"val\" /></form></html>";
             var promisedForm;
             beforeEach( function () {
-              dummyPromisifiedRequest.get = sinon.stub().returns(when.resolve({ body: formWithInputs }));
-              promisedForm = provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest);
+              dummypRequest.get = sinon.stub().returns(when.resolve({ body: formWithInputs }));
+              promisedForm = provideForm(dummyFormId, dummyUrl, dummypRequest);
             })
             it("Then `data` should have the inputs", function (done) {
               promisedForm.then( function (form) {
@@ -113,8 +113,8 @@ describe("Form Scraper", function () {
             var formWithInputs = "<html><form action=\"url\" id=\"test\"><input name=\"input1\" value=\"val\" /><input name=\"input2\" value=\"val2\" /></form></html>";
             var promisedForm;
             beforeEach( function () {
-              dummyPromisifiedRequest.get = sinon.stub().returns(when.resolve({ body: formWithInputs }));
-              promisedForm = provideForm(dummyFormId, dummyUrl, dummyPromisifiedRequest);
+              dummypRequest.get = sinon.stub().returns(when.resolve({ body: formWithInputs }));
+              promisedForm = provideForm(dummyFormId, dummyUrl, dummypRequest);
             })
             it("Then it should have several inputs", function (done) {
               promisedForm.then( function (form) {
@@ -139,7 +139,7 @@ describe("Form Scraper", function () {
     })
     describe("Given an instance ScrapingFormProvider", function () {
       var provider;
-      var options = { formId: "#test", url: "url", promisifiedRequest: {}}
+      var options = { formId: "#test", url: "url", pRequest: {}}
       beforeEach( function () {
         provider = new ScrapingFormProvider();
       })
@@ -150,8 +150,8 @@ describe("Form Scraper", function () {
       })
       describe("Given promisified request", function () {
         beforeEach( function () {
-          options.promisifiedRequest.get = when.resolve;
-          sinon.spy(options.promisifiedRequest, "get");
+          options.pRequest.get = when.resolve;
+          sinon.spy(options.pRequest, "get");
           provider.updateOptions(options);
         })
         describe("#.provideForm()", function () {
@@ -163,7 +163,7 @@ describe("Form Scraper", function () {
             form.should.have.property("then");
           })
           it("and calls `get` on promisified Request", function () {
-            options.promisifiedRequest.get.should.be.called;
+            options.pRequest.get.should.be.called;
           })
         })
       })
@@ -175,7 +175,7 @@ describe("Form Scraper", function () {
 
     beforeEach( function () {
       options.formProvider = { provideForm: when.resolve };
-      options.promisifiedRequest = { post: when.resolve };
+      options.pRequest = { post: when.resolve };
       options.formValues = {name: "val"};
     })
 
@@ -183,38 +183,38 @@ describe("Form Scraper", function () {
       describe("#.submitForm()", function () {
         var submitForm = submitter.submitForm;
         it("returns a promise", function () {
-          submitForm(options.formValues, options.formProvider, options.promisifiedRequest).should.have.property("then");
+          submitForm(options.formValues, options.formProvider, options.pRequest).should.have.property("then");
         })
         describe("Given FormProvider And Promisified Request", function () {
           var postResponse;
           beforeEach( function () {
             options.formProvider.provideForm = function() {return when.resolve({action: "url", data: {name:""}})};
             sinon.spy(options.formProvider, "provideForm");
-            sinon.spy(options.promisifiedRequest, "post");
-            postResponse = submitForm(options.formValues, options.formProvider, options.promisifiedRequest);
+            sinon.spy(options.pRequest, "post");
+            postResponse = submitForm(options.formValues, options.formProvider, options.pRequest);
           })
           it("should call it's .provideForm()", function () {
             options.formProvider.provideForm.should.be.called;
           })
           it("and then it should post the form", function (done) {
             postResponse.then( function () {
-              options.promisifiedRequest.post.should.be.called;
+              options.pRequest.post.should.be.called;
             }).should.notify(done);
           })
           it("to the url that is returned from FormProvider", function (done) {
             postResponse.then( function () {
-              options.promisifiedRequest.post.should.be.calledWith("url");
+              options.pRequest.post.should.be.calledWith("url");
             }).should.notify(done);
           })
           it("with the form data from FormProvider", function (done) {
             postResponse.then( function () {
-              options.promisifiedRequest.post.getCall(0).args[1].form.should.have.property("name");
+              options.pRequest.post.getCall(0).args[1].form.should.have.property("name");
             }).should.notify(done);
           })
           describe("Given formValues", function () {
             it("Then it should combine it with `data` from FormProvider", function (done) {
               postResponse.then( function () {
-                options.promisifiedRequest.post.getCall(0).args[1].form.should.have.property("name", "val");
+                options.pRequest.post.getCall(0).args[1].form.should.have.property("name", "val");
               }).should.notify(done);
             })
           })
@@ -228,7 +228,7 @@ describe("Form Scraper", function () {
         submitter = new form.FormSubmitter();
         options = {
           formProvider: {provideForm: function () {return when.resolve( {action: "", data: {}})} },
-          promisifiedRequest: {post: when.resolve }
+          pRequest: {post: when.resolve }
         };
       })
       describe("#.updateOptions()", function () {
@@ -243,7 +243,7 @@ describe("Form Scraper", function () {
         it("should return a Promise", function () {
           submitter.submitForm().should.have.property("then");
         })
-        describe("Given a FormProvider and a PromisedRequest", function () {
+        describe("Given a FormProvider and a pRequest", function () {
           it("a form should be requested", function (done) {
             sinon.spy(options.formProvider, "provideForm");
             submitter.submitForm().then( function () {
@@ -251,12 +251,22 @@ describe("Form Scraper", function () {
             }).should.notify(done);
           })
           it("and posted", function (done) {
-            sinon.spy(options.promisifiedRequest, "post");
+            sinon.spy(options.pRequest, "post");
             submitter.submitForm().then( function () {
-              options.promisifiedRequest.post.should.be.called;
+              options.pRequest.post.should.be.called;
             }).should.notify(done);
           })
         })
+      })
+    })
+  })
+  describe(" ", function () {
+    describe("#.createScrapingFormProvider()", function () {
+      it("can be called", function () {
+        var formProvider = form.createScrapingFormProvider("formId", "url", {});
+      })
+      it("and returns a FormProvider", function () {
+        form.createScrapingFormProvider("formId", "url", {}).should.have.property("provideForm");
       })
     })
   })

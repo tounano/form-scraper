@@ -2,12 +2,12 @@ var _ = require("underscore");
 var when = require("when");
 var cheerio = require("cheerio");
 
-var ScrapingFormProvider = function(options) {};
+var ScrapingFormProvider = function(options) {this.options = options; };
 
 _.extend(ScrapingFormProvider, {
-  provideForm: function (formId, url, promisifiedRequest) {
+  provideForm: function (formId, url, pRequest) {
     var $;
-    return promisifiedRequest.get(url)
+    return pRequest.get(url)
       .then(fetchFormDataFromHttpResponse);
 
     function fetchFormDataFromHttpResponse(response) {
@@ -52,15 +52,15 @@ _.extend(ScrapingFormProvider.prototype, {
   },
 
   provideForm: function () {
-    return ScrapingFormProvider.provideForm(this.options.formId, this.options.url, this.options.promisifiedRequest);
+    return ScrapingFormProvider.provideForm(this.options.formId, this.options.url, this.options.pRequest);
   }
 });
 
-var FormSubmitter = function () {};
+var FormSubmitter = function (options) { this.options = options ? options : {}; };
 _.extend(FormSubmitter, {
-  submitForm: function (formValues, formProvider, promisifiedRequest) {
+  submitForm: function (formValues, formProvider, pRequest) {
     return formProvider.provideForm().then( function (formData) {
-      return promisifiedRequest.post(formData.action, {form: _.extend(formData.data, formValues) });
+      return pRequest.post(formData.action, {form: _.extend(formData.data, formValues) });
     });
   }
 });
@@ -72,7 +72,7 @@ _.extend(FormSubmitter.prototype, {
   },
 
   submitForm: function (formValues) {
-    return FormSubmitter.submitForm(formValues, this.options.formProvider, this.options.promisifiedRequest);
+    return FormSubmitter.submitForm(formValues, this.options.formProvider, this.options.pRequest);
   }
 })
 var C = {
@@ -88,4 +88,21 @@ exports.provideForm = function (promiseForForm) {
   return {
     provideForm: function () { return promiseForForm }
   }
+}
+
+function createScrapingFormProvider (formId, url, pRequest) {
+  return new ScrapingFormProvider({
+    formId: formId,
+    url: url,
+    pRequest: pRequest
+  });
+}
+
+exports.createScrapingFormProvider = createScrapingFormProvider;
+
+exports.createFormSubmitter = function (formId, url, pRequest) {
+  return new FormSubmitter({
+    pRequest: pRequest,
+    formProvider: createScrapingFormProvider(formId, url, pRequest)
+  });
 }
