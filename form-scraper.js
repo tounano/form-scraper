@@ -1,12 +1,14 @@
 var _ = require("underscore");
 var when = require("when");
 var cheerio = require("cheerio");
+var nodeUrl = require("url");
 
 var ScrapingFormProvider = function(options) {this.options = options; };
 
 _.extend(ScrapingFormProvider, {
   provideForm: function (formId, url, pRequest) {
     var $;
+    var that = this;
     return pRequest.get(url)
       .then(fetchFormDataFromHttpResponse);
 
@@ -22,7 +24,7 @@ _.extend(ScrapingFormProvider, {
 
     function fetchFormDataFrom(formDom) {
       var formData = {};
-      provideActionData(formDom, formData);
+      provideActionData.apply(this, [formDom, formData]);
       provideInputData(formDom, formData);
 
       return formData;
@@ -33,7 +35,7 @@ _.extend(ScrapingFormProvider, {
     }
 
     function provideActionData(formDom, formData) {
-      formData.action = formDom.attr('action');
+      formData.action = nodeUrl.resolve(url, formDom.attr('action'));
     }
 
     function provideInputData(formDom, formData) {
