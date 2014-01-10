@@ -1,11 +1,11 @@
 {
   "name": "form-scraper",
   "description": "Scrape and Submit forms easily...",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "ClickHere <js@clickhere.co.il>",
   "dependencies": {
     "when": "2.7.x",
-    "promisified-request": "0.x.x",
+    "promisified-request": "latest",
     "underscore": "1.5.x",
     "cheerio": "0.12.x"
   },
