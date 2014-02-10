@@ -40,8 +40,22 @@ _.extend(ScrapingFormProvider, {
 
     function provideInputData(formDom, formData) {
       formData.data = {};
+
+      var addDataToFormData = function(key, value) {
+          formData.data[key] = value;
+      };
+
       formDom.find("input").each( function () {
-        formData.data[$(this).attr("name")] = $(this).val();
+        if($(this).attr("type") === "image") {
+          addDataToFormData($(this).attr("name") + '.x', "0");
+          addDataToFormData($(this).attr("name") + '.y', "0");
+
+          if ($(this).val()) {
+            addDataToFormData($(this).attr("name"), $(this).val());
+          }
+        } else {
+          addDataToFormData($(this).attr("name"), $(this).val());
+        }
       });
     }
   }
