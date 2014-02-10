@@ -134,6 +134,64 @@ describe("Form Scraper", function () {
               }).should.notify(done);
             })
           })
+          describe("Given the form has several inputs including type='image' with value", function () {
+              var formWithInputs = "<html><form action=\"url\" id=\"test\"><input name=\"input1\" value=\"val\" /><input name=\"input2\" value=\"val2\" /><input type=\"image\" name=\"imageInput\" value=\"imageValue\" /></form></html>";
+              beforeEach( function () {
+                  dummypRequest.get = sinon.stub().returns(when.resolve({ body: formWithInputs }));
+                  promisedForm = provideForm(dummyFormId, dummyUrl, dummypRequest);
+              })
+              it("Then it should have several inputs", function (done) {
+                  promisedForm.then( function (form) {
+                      Object.keys(form.data).length.should.be.greaterThan(1);
+                  }).should.notify(done);
+              })
+              it("where `keys` are the names including coordinates for input type='image'", function (done) {
+                  promisedForm.then( function (form) {
+                      form.data.should.have.property("input1");
+                      form.data.should.have.property("input2");
+                      form.data.should.have.property("imageInput");
+                      form.data.should.have.property("imageInput.x");
+                      form.data.should.have.property("imageInput.y");
+                  }).should.notify(done);
+              })
+              it("and values are the values including 0s for image coordinates", function (done) {
+                  promisedForm.then( function (form) {
+                      form.data.should.have.property("input1", "val");
+                      form.data.should.have.property("input2", "val2");
+                      form.data.should.have.property("imageInput", "imageValue");
+                      form.data.should.have.property("imageInput.x", "0");
+                      form.data.should.have.property("imageInput.y", "0");
+                  }).should.notify(done);
+              })
+          })
+            describe("Given the form has several inputs including type='image' without value", function () {
+                var formWithInputs = "<html><form action=\"url\" id=\"test\"><input name=\"input1\" value=\"val\" /><input name=\"input2\" value=\"val2\" /><input type=\"image\" name=\"imageInput\" /></form></html>";
+                beforeEach( function () {
+                    dummypRequest.get = sinon.stub().returns(when.resolve({ body: formWithInputs }));
+                    promisedForm = provideForm(dummyFormId, dummyUrl, dummypRequest);
+                })
+                it("Then it should have several inputs", function (done) {
+                    promisedForm.then( function (form) {
+                        Object.keys(form.data).length.should.be.greaterThan(1);
+                    }).should.notify(done);
+                })
+                it("where `keys` are the names including coordinates for input type='image' but without image input name", function (done) {
+                    promisedForm.then( function (form) {
+                        form.data.should.have.property("input1");
+                        form.data.should.have.property("input2");
+                        form.data.should.have.property("imageInput.x");
+                        form.data.should.have.property("imageInput.y");
+                    }).should.notify(done);
+                })
+                it("and values are the values including 0s for image coordinates but without image input value", function (done) {
+                    promisedForm.then( function (form) {
+                        form.data.should.have.property("input1", "val");
+                        form.data.should.have.property("input2", "val2");
+                        form.data.should.have.property("imageInput.x", "0");
+                        form.data.should.have.property("imageInput.y", "0");
+                    }).should.notify(done);
+                })
+            })
         })
       })
     })
