@@ -84,7 +84,7 @@ var loginDetails = { user: "my user", password: "my password" };
 
 fScraper.submitForm(loginDetails, fScraper.provideForm(formStructure), pRequest).then( function (response) {
     console.log(response.body);
-};
+});
 ```
 
 ### Object Oriented usage
